@@ -1,6 +1,12 @@
+import csv
+from dateutil import tz
+from datetime import datetime
+import cryptocompare
 import pandas as pd
 from datetime import date
 from django.http import JsonResponse
+from pandas.core.tools.datetimes import to_datetime
+from pandas.io.clipboards import to_clipboard
 
 
 def speedometer(request):
@@ -21,3 +27,29 @@ def speedometer(request):
         change = (mean_pos_sen - mean_neg_sen) * 100
 
     return JsonResponse({'change': round(change, 3)}, safe=False)
+
+
+def get_price_data(request):
+    india_tz = tz.gettz('Asia/Kolkata')
+    num = 7
+
+    z = cryptocompare.get_historical_price_day(
+        'BTC', 'USD', toTs=date.today(), limit=num)[:-1]
+
+    for i in z:
+        i['time'] = datetime.fromtimestamp(
+            i['time']).strftime("%Y-%m-%d")
+
+    return JsonResponse(z, safe=False)
+
+
+def get_predicted_prices(request):
+    df = pd.read_csv('api/analysis/predictions.csv')
+
+    slope = df['prediction'][1] - df['prediction'][0]
+
+    return JsonResponse({
+        'x': date.today(),
+        'y': [df['prediction'][1], df['prediction'][1],
+              df['prediction'][1] + slope, df['prediction'][1]+slope]
+    }, safe=False)

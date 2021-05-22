@@ -36,7 +36,7 @@ def timeConversion(x):
 
 
 num = int(input())
-BASE_PATH = './api/analysis'
+BASE_PATH = './backend/api/analysis'
 
 
 with open(os.path.join(BASE_PATH, 'prices.csv'), 'w', newline='') as file:
